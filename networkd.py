@@ -22,48 +22,66 @@ short_description: Configure Link, NetDev and Network for systemd-networkd
 requirements: [ systemd-networkd, systemd]
 version_added: "2.8"
 description:
-    - Generate systemd-networks configuration files.
+    - Generate systemd-networks configuration files
 options:
     state:
         description:
-            - Whether the configuration files should exist or not.
+            - Whether the configuration files should exist or not
         required: True
         choices: [ "present", "absent" ]
-    name:
-        description:
-            - Where name will be the what we call the interface name.
-        required: True
     config_type:
         description:
-            - Specifies the configuration type file to create.
+            - Specifies the configuration type file to create
         required: true
         choices: [ "link", "netdev", "network" ]
     config_path:
         description:
-            - Specifies the path where to write the configuration files.
+            - Specifies the path where to write the configuration files
         default: "/var/run/systemd/network"
         choices: [ "/var/run/systemd/network", "/lib/systemd/network", "/etc/systemd/network" ]
     file_name:
         description:
-            - This configuration file name  where the configurations will be written.
+            - This configuration file name  where the configurations will be written
+
+# [Match] Section Options
+    name:
+        description:
+            - Where name will be the what we call the interface name
+        required: True
+
+    match_mac_address:
+        description:
+            - Specifies the intercace mac address that would be applied for matching
+        required: True
+
+    driver:
+        description:
+            - Matches against the hostname or machine ID of the host. Applies to link config [Match] section
+    host:
+        description:
+            - A whitespace-separated list of shell-style globs matching the driver currently bound to the device
+
+# NetDev Configuration [NetDev]
+
     kind:
         description:
             - This is the type of netdev device you wish to create.
-        choices: [ "bond", "bridge", "vlan", "macvlan", "ipip" ]
+        choices: [ "bond", "bridge", "vlan", "macvlan", "ipip", "sit", "gre", "greptap", "ip6gre", "ip6tnl",
+                   "ip6gretap", "vti", "vti6", "vxlan" ]
     mac_address:
         description:
-            - Configures the MAC address.
+            - Configures the MAC address that should be applied to this netdev
     mtu_bytes:
         description:
             - Configures MTU of the interface.
     bond_mode:
         description:
-            - This is the type of device or network connection that you wish to create for a bond.
+            - This is the type of device or network connection that you wish to create for a bond
         default: balance-rr
         choices: [ "balance-rr", "active-backup", "balance-xor", "broadcast", "802.3ad", "balance-tlb", "balance-alb" ]
     transmit_hash_policy:
         description:
-            - Configures the transmit hash policy to use for slave selection in balance-xor, 802.3ad, and tlb modes.
+            - Configures the transmit hash policy to use for slave selection in balance-xor, 802.3ad, and tlb modes
               Applies only for Bond.
         required: false
         choices: [ "layer2", "layer3+4", "layer2+3", "encap2+3", "encap3+4" ]
@@ -77,7 +95,7 @@ options:
             - The VLAN ID to use. An integer in the range 0–4094. This option is compulsory.
     tunnel_local:
         description:
-            - Local IP address of tunnel. Applies only for tunnels.
+            - Local IP address of tunnel. Applies only for tunnels
         required: true
     tunnel_remote:
         description:
@@ -85,31 +103,50 @@ options:
         required: true
     tunnel_create_independent:
         description:
-            - Created as "tunnel@NONE". Applies only for tunnel.
+            - Created as "tunnel@NONE". Applies only for tunnel
         required: false
     stp:
         description:
-            - This enables the bridge's Spanning Tree Protocol (STP).
+            - This enables the bridge's Spanning Tree Protocol (STP)
         choices: [ "yes", "no"]
     hello_time:
         description:
-            - Configures the bridge's hello time in seconds.
+            - Configures the bridge's hello time in seconds
         required: false
     forward_delay:
         description:
-            - Configures the bridge's forward delay in seconds.
+            - Configures the bridge's forward delay in seconds
         required: false
     max_age:
         description:
-            - Configures the bridge's max delay in seconds.
+            - Configures the bridge's max delay in seconds
         required: false
     priority:
         description:
-            - Configures the priority of the bridge.
+            - Configures the priority of the bridge
         required: false
+    vxlan_id:
+        description:
+            - The VXLAN ID to use
+        required: false
+    vxlan_local:
+        description:
+            - Configures local IP address
+        required: false
+    vxlan_remote:
+        description:
+            - Configures destination IP address
+        required: false
+    vxlan_destination_port:
+        description:
+            - Configures the default destination UDP port on a per-device basis
+        required: false
+
+# Network Configuration [Network] Section
+
     lldp:
         description:
-            - Controls support for Ethernet LLDP packet reception.
+            - Controls support for Ethernet LLDP packet reception
         choices: [ "yes", "no" ]
     ipv6_accept_ra:
         description:
@@ -117,53 +154,66 @@ options:
         choices: [ "yes", "no" ]
     dhcp:
         description:
-            - Enables DHCPv4 and/or DHCPv6 client support.
+            - Enables DHCPv4 and/or DHCPv6 client support
         choices: ["yes", "no", "ipv4", "ipv6"]
     address:
         description:
-            - A static IPv4 or IPv6 address and its prefix length, separated by a "/" character.
+            - A static IPv4 or IPv6 address and its prefix length, separated by a "/" character
     gateway:
         description:
-            - The gateway address.
+            - The gateway address
         required: false
     dns:
         description:
-            - A DNS server address to setup for the name.
+            - A DNS server address to setup for the name
         required: false
     domains:
         description:
-            - A space separated list of domains which should be resolved using the DNS servers on this link.
+            - A space separated list of domains which should be resolved using the DNS servers on this link
         required: false
     ntp:
         description:
             - An NTP server address.
         required: false
-    join_bridge:
+    master_bridge:
         description:
-            - Name of the bridge which name (interface) will join.
+            - Name of the bridge which name (interface) will join
         required: false
-    join_bond:
+    master_bond:
         description:
-            - The name of the bond to add the link.
+            - The name of the bond to add the link
         required: false
-    join_vlan:
+    vlan_device:
         description:
-            - The name of a vlan to create on the link.
+            - The name of a vlan to create on the link
         required: false
-    join_macvlan:
+    macvlan_device:
         description:
-            - The name of a macvlan to create on the link.
+            - The name of a macvlan to create on the link
         required: false
-    join_tunnel:
+    tunnel_device:
         description:
-            - The name of a tunnel(ipip) to create on the link.
+            - The name of a tunnel(ipip) to create on the link
         required: false
-    driver:
+    addresses:
         description:
-            - Matches against the hostname or machine ID of the host. Applies to link config [Match] section.
-    host:
+            - Specifies static IPv4 or IPv6 addresses. Applies to Address section
+        required: false
+    routes:
         description:
-            - A whitespace-separated list of shell-style globs matching the driver currently bound to the device.
+            - Specifies static routes to be cofigured accepts multiple routes applies to Route section separated by ',' and following keys
+              via= The gateway address
+              to= The destination prefix of the route
+              from= The preferred source address of the route
+              route_type= The Type identifier for special route types which can be one of "unicast", "blackhole", "unreachable", "prohibit"
+              metric= Specifies the metric of the route
+              scope= The scope of the route, which can be "global", "link" or "host". Defaults to "global"
+              table= The table identifier for the route (a number between 1 and 4294967295, or 0 to unset)
+              onlink= Accpets "yes" or "no"
+        required: false
+
+# [Link] Section Options
+
     alias:
         description:
             - The "ifalias" is set to this value. Applies to link config [Link] section.
@@ -187,6 +237,21 @@ EXAMPLES = '''
       dhcp: yes
       state: present
 
+# Configure interface with multiple addresses
+  - networkd:
+      conf_type: network
+      name: eth0
+      dhcp: yes
+      addresses: 192.168.1.5/24 192.168.1.6/24 192.168.1.7/24
+      state: present
+
+# Configure interface with multiple routes
+  - networkd:
+        config_type=network
+        name=eth0
+        routes="to=0.0.0.0/0 via=5.0.0.1 metric=100, to=192.168.4.0/24 via=192.168.5.2 metric=100"
+        state=present
+
 # Bridge with two ports
   - networkd:
       conf_type: netdev
@@ -197,13 +262,13 @@ EXAMPLES = '''
   - networkd:
       conf_type: network
       name: eth1
-      join_bridge: brtest
+      master_bridge: brtest
       state: present
 
   - networkd:
       conf_type: network
       name: eth2
-      join_bridge: brtest
+      master_bridge: brtest
       state: present
 
 # Bond network
@@ -217,13 +282,13 @@ EXAMPLES = '''
   - networkd:
        config_type=network
        name=eth0
-       join_bond=bond1
+       master_bond=bond1
        state=present
 
   - networkd:
        config_type=network
        name=eth1
-       join_bond=bond1
+       master_bond=bond1
        state=present
 
   - networkd:
@@ -231,6 +296,61 @@ EXAMPLES = '''
        name=bond1
        dhcp=yes
        state=present
+
+# ipip tunnel
+  - networkd:
+        config_type=netdev
+        name=ipip-t
+        kind=ipip
+        tunnel_local=192.168.1.1
+        tunnel_remote=192.168.1.3
+        state=present
+
+  - networkd:
+        config_type=network
+        name=eth0
+        tunnel_device=ipip-t
+        state=present
+
+# Tunnel independent
+  - networkd:
+        config_type=netdev
+        name=ipip-t
+        kind=ipip
+        tunnel_local=192.168.1.1
+        tunnel_remote=192.168.1.3
+        tunnel_create_independent=true
+        state=present
+
+# VLan
+  - networkd:
+        config_type=netdev
+        name=eth0.11
+        kind=vlan
+        vlan_id=11
+        state=present
+
+  - networkd:
+        config_type=netdev
+        name=eth0.12
+        kind=vlan
+        vlan_id=12
+        state=present
+
+  - networkd:
+        config_type=network
+        name=eth0
+        vlan_device="eth0.11 eth0.12"
+        state=present
+
+# VxLan
+  - networkd:
+        config_type=netdev
+        name=vxlan-test
+        kind=vxlan
+        vxlan_id=13
+        vxlan_local=192.168.1.1
+        vxlan_remote=192.168.1.3
 '''
 
 UNIT_PATH_NETWORKD = '/lib/systemd/network'
@@ -239,52 +359,57 @@ UNIT_PATH_NETWORKD_RUN = '/var/run/systemd/network'
 
 RETURN = r"""#
 """
-
-from ansible.module_utils.basic import AnsibleModule
 import os
+from ansible.module_utils.basic import AnsibleModule
 
 
 class NetworkdUtilities:
+    def __init__(self, module):
+        self.module = module
+        self.config_type = module.params['config_type']
+        self.config_path = module.params['config_path']
+        self.file_name = module.params['file_name']
+        self.name = module.params['name']
 
-    def remove_files(self, conf_files, names):
+    def remove_files(self):
         paths = [UNIT_PATH_NETWORKD_RUN, UNIT_PATH_NETWORKD_SYSTEM, UNIT_PATH_NETWORKD]
         conf_types = ['network', 'link', 'netdev']
-        status = False
+        rc = False
 
-        if conf_files:
-            list_conf_files = conf_files.split(' ')
+        if self.file_name:
+            list_conf_files = self.file_name.split(' ')
             for conf_file in list_conf_files:
                 for conf_path in paths:
                     if os.path.exists(os.path.join(conf_path, conf_file)):
                         os.remove(os.path.join(conf_path, conf_file))
-                        status = True
+                        rc = True
 
-        if names:
-            list_names = names.split(' ')
+        if self.name:
+            list_names = self.name.split(' ')
             for name in list_names:
                 for conf_type in conf_types:
                     file_name = name + '.{0}'.format(conf_type)
                     for conf_path in paths:
                         if os.path.exists(os.path.join(conf_path, file_name)):
                             os.remove(os.path.join(conf_path, file_name))
-                            status = True
-        return status
+                            rc = True
+        return rc
 
-    def write_configs_to_file(self, config_type, path, name, config):
-        if config_type == 'link':
-            file_name = '{0}.link'.format(name)
-            dest = os.path.join(path, file_name)
-        elif config_type == 'netdev':
-            file_name = '{0}.netdev'.format(name)
-            dest = os.path.join(path, file_name)
-        elif config_type == 'network':
-            file_name = '{0}.network'.format(name)
-            dest = os.path.join(path, file_name)
+    def write_configs_to_file(self, config):
+        if self.config_type == 'link':
+            file_name = '{0}.link'.format(self.name)
+            dest = os.path.join(self.config_path, file_name)
+        elif self.config_type == 'netdev':
+            file_name = '{0}.netdev'.format(self.name)
+            dest = os.path.join(self.config_path, file_name)
+        elif self.config_type == 'network':
+            file_name = '{0}.network'.format(self.name)
+            dest = os.path.join(self.config_path, file_name)
         else:
             return False
 
-        if not os.path.exists(path):
-            os.makedirs(path, exist_ok=True)
+        if not os.path.exists(self.config_path):
+            os.makedirs(self.config_path, exist_ok=True)
 
         with open(dest, "w") as f:
             f.write(config)
@@ -294,14 +419,14 @@ class NetworkdUtilities:
         return False
 
 
-class Link(NetworkdUtilities):
+class Link:
 
     def __init__(self, module):
         self.module = module
-        self.config_path = module.params['config_path']
         self.name = module.params['name']
         self.link_name = module.params['link_name']
         self.mac_address = module.params['mac_address']
+        self.match_mac_address = module.params['match_mac_address']
         self.host = module.params['host']
         self.wake_on_lan = module.params['wake_on_lan']
         self.driver = module.params['driver']
@@ -313,8 +438,8 @@ class Link(NetworkdUtilities):
 
         if self.driver:
             conf += 'Driver={0}\n'.format(self.driver)
-        if self.mac_address:
-            conf += 'MACAddress={0}\n'.format(self.mac_address)
+        if self.match_mac_address:
+            conf += 'MACAddress={0}\n'.format(self.match_mac_address)
         if self.name:
             conf += 'Name={0}\n'.format(self.name)
         if self.host:
@@ -323,29 +448,28 @@ class Link(NetworkdUtilities):
         return conf + '\n'
 
     def create_config_link(self):
-        conf = ''
-        conf += self.write_matchtion_config()
+        conf = self.write_matchtion_config()
         conf += '[Link]\n'
 
         if self.alias:
             conf += 'Alias={0}\n'.format(self.alias)
         if self.link_name:
             conf += 'Name={0}\n'.format(self.link_name)
+        if self.mac_address:
+            conf += 'MACAddress={0}\n'.format(self.mac_address)
         if self.mtu_bytes:
             conf += 'MTUBytes={0}\n'.format(self.mtu_bytes)
         if self.wake_on_lan:
             conf += 'WakeOnLan={0}\n'.format(self.wake_on_lan)
 
-        self.write_configs_to_file('link', self.config_path, self.name, conf)
+        config = NetworkdUtilities(self.module)
+        return config.write_configs_to_file(conf)
 
-        return True
 
-
-class Network(NetworkdUtilities):
+class Network:
 
     def __init__(self, module):
         self.module = module
-        self.config_path = module.params['config_path']
         self.name = module.params['name']
         self.mac_address = module.params['mac_address']
 
@@ -358,16 +482,68 @@ class Network(NetworkdUtilities):
         self.ipv6_accept_ra = module.params['ipv6_accept_ra']
         self.lldp = module.params['lldp']
 
-        self.join_bridge = module.params['join_bridge']
-        self.join_bond = module.params['join_bond']
-        self.join_macvlan = module.params['join_macvlan']
-        self.join_vlan = module.params['join_vlan']
+        self.master_bridge = module.params['master_bridge']
+        self.master_bond = module.params['master_bond']
+        self.macvlan_device = module.params['macvlan_device']
+        self.vlan_device = module.params['vlan_device']
+        self.tunnel_device = module.params['tunnel_device']
+
+        self.addresses = module.params['addresses']
+        self.routes = module.params['routes']
+
+    def create_config_route(self, route):
+        from_source = None
+        route_type = None
+        scope = None
+        table = None
+        metric = None
+        onlink = None
+        via = None
+        to = None
+
+        conf = "\n[Route]\n"
+        route_keys = route.split(' ')
+
+        for key in route_keys:
+            if key.startswith('via'):
+                via = key.split('=')[1]
+            elif key.startswith('to'):
+                to = key.split('=')[1]
+            elif key.startswith('from'):
+                from_source = key.split('=')[1]
+            elif key.startswith('scope'):
+                scope = key.split('=')[1]
+            elif key.startswith('type'):
+                route_type = key.split('=')[1]
+            elif key.startswith('table'):
+                table = key.split('=')[1]
+            elif key.startswith('metric'):
+                metric = key.split('=')[1]
+            elif key.startswith('onlink'):
+                onlink = key.split('=')[1]
+
+        if via:
+            conf += 'Gateway={0}\n'.format(via)
+        if to:
+            conf += 'Destination={0}\n'.format(to)
+        if from_source:
+            conf += 'PreferredSource={0}\n'.format(from_source)
+        if scope:
+            conf += 'Scope={0}\n'.format(scope)
+        if route_type:
+            conf += 'Type={0}\n'.format(route_type)
+        if onlink:
+            conf += 'GatewayOnlink={0}\n'.format(onlink)
+        if metric:
+            conf += 'Metric={0}\n'.format(metric)
+        if table:
+            conf += 'Table={0}\n'.format(table)
+
+        return conf + '\n'
 
     def create_config_network(self):
-        conf = ''
-
         link = Link(self.module)
-        conf += link.write_matchtion_config()
+        conf = link.write_matchtion_config()
         conf += '[Network]\n'
 
         if self.dhcp:
@@ -386,29 +562,37 @@ class Network(NetworkdUtilities):
             conf += 'IPv6AcceptRA={0}\n'.format(self.ipv6_accept_ra)
         if self.lldp:
             conf += 'LLDP={0}\n'.format(self.lldp)
-        if self.join_bridge:
-            conf += 'Bridge={0}\n'.format(self.join_bridge)
-        if self.join_bond:
-            conf += 'Bond={0}\n'.format(self.join_bond)
-        if self.join_vlan:
-
-            list_vlans = self.join_vlan.split(' ')
-
+        if self.master_bridge:
+            conf += 'Bridge={0}\n'.format(self.master_bridge)
+        if self.master_bond:
+            conf += 'Bond={0}\n'.format(self.master_bond)
+        if self.vlan_device:
+            list_vlans = self.vlan_device.split(' ')
             for vlan in list_vlans:
                 conf += 'VLAN={0}\n'.format(vlan)
-        if self.join_macvlan:
-            conf += 'MACVLAN={0}\n'.format(self.join_macvlan)
+        if self.macvlan_device:
+            conf += 'MACVLAN={0}\n'.format(self.macvlan_device)
+        if self.tunnel_device:
+                conf += 'Tunnel={0}\n'.format(self.tunnel_device)
 
-        self.write_configs_to_file('network', self.config_path, self.name, conf)
+        if self.addresses:
+            list_addresses = self.addresses.split(' ')
+            for address in list_addresses:
+                conf += "\n[Address]\nAddress={0}\n".format(address)
 
-        return True
+        if self.routes:
+            list_routes = self.routes.split(',')
+            for route in list_routes:
+                conf += self.create_config_route(route)
+
+        config = NetworkdUtilities(self.module)
+        return config.write_configs_to_file(conf)
 
 
-class NetDev(NetworkdUtilities):
+class NetDev:
 
     def __init__(self, module):
         self.module = module
-        self.config_path = module.params['config_path']
         self.name = module.params['name']
         self.kind = module.params['kind']
         self.mac_address = module.params['mac_address']
@@ -434,6 +618,12 @@ class NetDev(NetworkdUtilities):
         self.tunnel_local = module.params['tunnel_local']
         self.tunnel_remote = module.params['tunnel_remote']
         self.tunnel_create_independent = module.params['tunnel_create_independent']
+
+        # VXLAN
+        self.vxlan_id = module.params['vxlan_id']
+        self.vxlan_local = module.params['vxlan_local']
+        self.vxlan_remote = module.params['vxlan_remote']
+        self.vxlan_destination_port = module.params['vxlan_destination_port']
 
     def create_config_bridge_params(self):
         conf = ''
@@ -482,6 +672,26 @@ class NetDev(NetworkdUtilities):
 
         return conf
 
+    def create_config_vxlan_params(self):
+        conf = ''
+
+        if self.vxlan_id:
+            conf += 'Id={0}\n'.format(self.vxlan_id)
+
+        if self.vxlan_local:
+            conf += 'Local={0}\n'.format(self.vxlan_local)
+
+        if self.vxlan_remote:
+            conf += 'Remote={0}\n'.format(self.vxlan_remote)
+
+        if self.vxlan_destination_port:
+            conf += 'DestinationPort={0}\n'.format(self.vxlan_destination_port)
+
+        if conf:
+            return '\n[VXLAN]\n{0}'.format(conf)
+
+        return conf
+
     def create_config_netdev(self):
         conf = '[NetDev]\nName={0}\n'.format(self.name)
 
@@ -503,44 +713,44 @@ class NetDev(NetworkdUtilities):
             conf += 'Kind=macvlan\n\n[MACVLAN]\nMode={0}\n'.format(self.macvlan_mode)
         elif self.kind == 'macvtap':
             conf += 'Kind=macvlan\n\n[MACVTAP]\nMode={0}\n'.format(self.macvlan_mode)
-        elif self.kind == 'ipip':
-            conf += 'Kind=ipip\n'
+        elif self.kind in ['ipip', 'sit', 'gre', 'greptap', 'ip6gre', 'ip6tnl', 'vti', 'vti6']:
+            conf += 'Kind={0}\n'.format(self.kind)
             conf += self.create_config_tunnel_params()
+        elif self.kind == 'vxlan':
+            conf += 'Kind=vxlan\n'
+            conf += self.create_config_vxlan_params()
 
-        self.write_configs_to_file('netdev', self.config_path, self.name, conf)
+        config = NetworkdUtilities(self.module)
+        return config.write_configs_to_file(conf)
 
-        return True
 
-
-class Networkd(NetworkdUtilities):
+class Networkd:
 
     def __init__(self, module):
         self.module = module
         self.state = module.params['state']
         self.config_type = module.params['config_type']
-        self.config_path = module.params['config_path']
-        self.file_name = module.params['file_name']
-        self.name = module.params['name']
 
     def create_config_link(self):
-        status = False
+        rc = False
 
         if self.state == 'absent':
-            status = self.remove_files(self.file_name, self.name)
+            config = NetworkdUtilities(self.module)
+            rc = config.remove_files()
         else:
             if self.config_type == 'link':
                 link = Link(self.module)
-                status = link.create_config_link()
+                rc = link.create_config_link()
             elif self.config_type == 'netdev':
                 netdev = NetDev(self.module)
-                status = netdev.create_config_netdev()
+                rc = netdev.create_config_netdev()
             elif self.config_type == 'network':
                 network = Network(self.module)
-                status = network.create_config_network()
+                rc = network.create_config_network()
             else:
                 self.module.fail_json(msg='Can not determine the configuration type')
 
-            return status
+        return rc
 
 
 def main():
@@ -551,21 +761,24 @@ def main():
                                                                                   UNIT_PATH_NETWORKD_SYSTEM]),
             file_name=dict(default=None, type='str'),
             config_type=dict(type='str', default=None, choices=['link', 'netdev', 'network']),
+
+            # [Match] section
+            match_mac_address=dict(type='str', default=None),
             name=dict(required=True, type='str'),
-
-            mac_address=dict(type='str', default=None),
-            mtu_bytes=dict(type='str', default=None),
-
-            # [link] section
             host=dict(type='str', default=None),
             driver=dict(type='str', default=None),
+
+            # [link] section
+            mac_address=dict(type='str', default=None),
+            mtu_bytes=dict(type='str', default=None),
             alias=dict(type='str', default=None),
             wake_on_lan=dict(type='str', default=None, choices=['phy', 'unicast', 'multicast',
                                                                 'broadcast', 'arp', 'magic', 'secureon', 'off']),
             link_name=dict(type='str', default=None),
 
             # [NetDev] section
-            kind=dict(type='str', default=None, choices=['bridge', 'vlan', 'macvlan', 'bond', 'ipip']),
+            kind=dict(type='str', default=None, choices=['bridge', 'vlan', 'macvlan', 'bond', 'ipip', 'sit', 'gre',
+                                                         'greptap', 'ip6gre', 'ip6gretap', 'ip6tnl', 'vti', 'vti6', 'vxlan']),
 
             # [VLAN] section
             vlan_id=dict(type='str', default=None),
@@ -589,6 +802,13 @@ def main():
             bond_mode=dict(require=False, default='balance-rr', type='str', choices=['balance-rr', 'active-backup', 'balance-xor', 'broadcast', '802.3ad',
                                                                                      'balance-tlb', 'balance-alb']),
             transmit_hash_policy=dict(type='str', choices=['layer2', 'layer3+4', 'layer2+3', 'encap2+3', 'encap3+4']),
+
+            # [VXLAN] Sectionaddress=dict(type='str', default=None),
+            vxlan_id=dict(type='str', default=None),
+            vxlan_local=dict(type='str', default=None),
+            vxlan_remote=dict(type='str', default=None),
+            vxlan_destination_port=dict(type='str', default=None),
+
             # [Network] section
             dhcp=dict(type='str', default=None, choices=['yes', 'no', 'ipv4', 'ipv6']),
             address=dict(type='str', default=None),
@@ -600,16 +820,39 @@ def main():
             lldp=dict(type='str', default=None, choices=['yes', 'no']),
 
             # Enslave
-            join_bridge=dict(type='str', default=None),
-            join_bond=dict(type='str', default=None),
-            join_macvlan=dict(type='str', default=None),
-            join_vlan=dict(type='str', default=None),
-            join_tunnel=dict(type='str', default=None),
+            master_bridge=dict(type='str', default=None),
+            master_bond=dict(type='str', default=None),
+            macvlan_device=dict(type='str', default=None),
+            vlan_device=dict(type='str', default=None),
+            tunnel_device=dict(type='str', default=None),
+
+            # [Address] Section options
+            addresses=dict(type='str', default=None),
+
+            # [Route] Section options
+            routes=dict(type='str', default=None),
         ),
     )
 
     if module.params['state'] == 'present' and not module.params['config_type']:
         module.fail_json(msg='Config type required when state is present')
+
+    kind = module.params['kind']
+
+    if kind == 'vxlan':
+        vxlan_id = module.params['vxlan_id']
+        vxlan_local = module.params['vxlan_local']
+        vxlan_remote = module.params['vxlan_remote']
+
+        if vxlan_local is None or vxlan_id is None or vxlan_remote is None:
+            module.fail_json(msg='When kind is vxlan vxlan_id/vxlan_local/vxlan_remote is compulsory')
+
+    if kind in ['ipip', 'sit', 'gre', 'greptap', 'ip6gre', 'ip6gretap', 'ip6tnl', 'vti', 'vti6']:
+        tunnel_local = module.params['tunnel_local']
+        tunnel_remote = module.params['tunnel_remote']
+
+        if tunnel_local is None or tunnel_remote is None:
+                module.fail_json(msg='When kind is tunnel tunnel_local/tunnel_remote is compulsory')
 
     networkd = Networkd(module)
     status = networkd.create_config_link()

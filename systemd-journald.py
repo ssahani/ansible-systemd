@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: LGPL-2.1+
-# (c) 2018, Susant Sahani <susant@redhat.com>
+# (c) 2018, Susant Sahani <ssahani@gmail.com>
 
 from __future__ import absolute_import, division, print_function
 
@@ -15,22 +15,22 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 
 DOCUMENTATION = '''
 ---
-module: journald
-short_description: Automates journald conf files.
+module: systemd-journald
+short_description: Automates systemd-journald conf files.
 description:
-    - Allows you to generate journald configuration files.
+    - Allows you to generate systemd-journald configuration files.
 version_added: "2.8"
 options:
     conf_path:
         description:
             - Specifies the path where to write the configuration files.
-        default: "/etc/systemd/journald.conf"
-        choices: [ "/etc/systemd/journald.conf", "/etc/systemd/journald.conf.d",
-                   "/usr/lib/systemd/journald.conf.d", "/run/systemd/journald.conf.d" ]
+        default: "/etc/systemd/systemd-journald.conf"
+        choices: [ "/etc/systemd/systemd-journald.conf", "/etc/systemd/systemd-journald.conf.d",
+                   "/usr/lib/systemd/systemd-journald.conf.d", "/run/systemd/systemd-journald.conf.d" ]
     file_name:
         description:
             - This configuration file name where the configurations will be written. Note that file name will be
-              automatically have the extension .conf. When path is /etc/systemd/journald.conf then the file_name
+              automatically have the extension .conf. When path is /etc/systemd/systemd-journald.conf then the file_name
               will be ignored.
     storage:
         description:
@@ -74,16 +74,16 @@ author: "Susant Sahani (@ssahani) <susant@redhat.com>"
 
 EXAMPLES = '''
 # Create config file
-- journald:
-     conf_path: /run/systemd/journald.conf.d
+- systemd-journald:
+     conf_path: /run/systemd/systemd-journald.conf.d
      file_name: test
      storage: auto
      forward_to_syslog: yes
      action: create
 
 # Remove config file
-- journald:
-     conf_path: /run/systemd/journald.conf.d
+- systemd-journald:
+     conf_path: /run/systemd/systemd-journald.conf.d
      file_name: test
      action: remove
 '''
@@ -94,13 +94,13 @@ RETURN = r'''
 import os
 from ansible.module_utils.basic import get_platform, AnsibleModule
 
-UNIT_PATH_JOURNALD_SYSTEM_CONF = '/etc/systemd/journald.conf'
-UNIT_PATH_JOURNALD_SYSTEM = '/etc/systemd/journald.conf.d'
-UNIT_PATH_JOURNALD = '/usr/lib/systemd/journald.conf.d'
-UNIT_PATH_JOURNALD_RUN = '/run/systemd/journald.conf.d'
+UNIT_PATH_SYSTEMD-JOURNALD_SYSTEM_CONF = '/etc/systemd/systemd-journald.conf'
+UNIT_PATH_SYSTEMD-JOURNALD_SYSTEM = '/etc/systemd/systemd-journald.conf.d'
+UNIT_PATH_SYSTEMD-JOURNALD = '/usr/lib/systemd/systemd-journald.conf.d'
+UNIT_PATH_SYSTEMD-JOURNALD_RUN = '/run/systemd/systemd-journald.conf.d'
 
 
-class journald(object):
+class systemd-journald(object):
 
     def __init__(self, module):
         self.module = module
@@ -119,7 +119,7 @@ class journald(object):
         self.changed = False
 
     def remove_files(self):
-        paths = [UNIT_PATH_JOURNALD_RUN, UNIT_PATH_JOURNALD_SYSTEM, UNIT_PATH_JOURNALD]
+        paths = [UNIT_PATH_SYSTEMD-JOURNALD_RUN, UNIT_PATH_SYSTEMD-JOURNALD_SYSTEM, UNIT_PATH_SYSTEMD-JOURNALD]
         rc = False
 
         list_conf_files = self.file_name.split(' ')
@@ -135,11 +135,11 @@ class journald(object):
         if not os.path.exists(self.conf_path):
             os.makedirs(self.conf_path, exist_ok=True)
 
-        if self.conf_path != UNIT_PATH_JOURNALD_SYSTEM_CONF:
+        if self.conf_path != UNIT_PATH_SYSTEMD-JOURNALD_SYSTEM_CONF:
             self.file_name += '.conf'
             path = os.path.join(self.conf_path, self.file_name)
         else:
-            path = UNIT_PATH_JOURNALD_SYSTEM_CONF
+            path = UNIT_PATH_SYSTEMD-JOURNALD_SYSTEM_CONF
 
         with open(path, "w") as f:
                 f.write(conf + '\n')
@@ -170,7 +170,7 @@ class journald(object):
 
         return conf
 
-    def configure_journald(self):
+    def configure_systemd-journald(self):
         rc = False
 
         if self.action == 'create':
@@ -185,9 +185,9 @@ class journald(object):
 def main():
     module = AnsibleModule(
         argument_spec=dict(
-            conf_path=dict(default=UNIT_PATH_JOURNALD_SYSTEM_CONF, type='str',
-                           choices=[UNIT_PATH_JOURNALD_SYSTEM_CONF, UNIT_PATH_JOURNALD, UNIT_PATH_JOURNALD_RUN,
-                                    UNIT_PATH_JOURNALD_SYSTEM]),
+            conf_path=dict(default=UNIT_PATH_SYSTEMD-JOURNALD_SYSTEM_CONF, type='str',
+                           choices=[UNIT_PATH_SYSTEMD-JOURNALD_SYSTEM_CONF, UNIT_PATH_SYSTEMD-JOURNALD, UNIT_PATH_SYSTEMD-JOURNALD_RUN,
+                                    UNIT_PATH_SYSTEMD-JOURNALD_SYSTEM]),
             file_name=dict(default=None, type='str'),
             storage=dict(default=None, type='str', choices=['volatile', 'persistent', 'auto', 'none']),
             compress=dict(required=False, default=None, type='str', choices=['yes', 'no']),
@@ -205,11 +205,11 @@ def main():
     conf_path = module.params['conf_path']
     file_name = module.params['file_name']
 
-    if conf_path != UNIT_PATH_JOURNALD_SYSTEM_CONF and file_name is None:
+    if conf_path != UNIT_PATH_SYSTEMD-JOURNALD_SYSTEM_CONF and file_name is None:
         module.fail_json(msg='file_name cannot be None')
 
-    journal = journald(module)
-    result = journal.configure_journald()
+    journal = systemd-journald(module)
+    result = journal.configure_systemd-journald()
 
     module.exit_json(changed=result)
 

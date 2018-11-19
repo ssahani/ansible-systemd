@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: LGPL-2.1+
-# (c) 2018, Susant Sahani <susant@redhat.com>
+# (c) 2018, Susant Sahani <ssahani@gmail.com>
 
 from __future__ import absolute_import, division, print_function
 
